@@ -1,0 +1,12 @@
+[repository]
+name = "minimize-dispatcher"
+authors = ["khalid151"]
+
+[minimize-dispatcher]
+description = "A hyprland plugin to add minimize and unminimize dispatchers in addition to having the CSD minimize button work."
+authors = ["khalid151"]
+build = [
+    "make",
+]
+output = "minimize-dispatcher.so"
+
