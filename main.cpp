@@ -58,16 +58,6 @@ static SDispatchResult dispatchUnminimize(std::string args) {
     return SDispatchResult{};
 }
 
-void hkCXDGToplevelResConstructor(CXDGToplevelResource* thisptr, SP<CXdgToplevel> resource, SP<CXDGSurfaceResource> owner) {
-    (*(origCXDGToplevelResConstructor)g_pCXDGToplevelResConstructor->m_original)(thisptr, resource, owner);
-
-    resource->setSetMinimized([thisptr](CXdgToplevel* t) {
-        if (auto window = thisptr->m_window.lock()) {
-            minimize(window);
-        }
-    });
-}
-
 APICALL EXPORT std::string PLUGIN_API_VERSION() {
     return HYPRLAND_API_VERSION;
 }
@@ -86,16 +76,7 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
         throw std::runtime_error("[minimize-dispatcher] Version mismatch");
     }
 
-    auto FNS = HyprlandAPI::findFunctionsByName(PHANDLE, "CXDGToplevelResource");
-    for (auto& fn : FNS) {
-        if (!fn.demangled.contains("CXDGToplevelResource::CXDGToplevelResource"))
-            continue;
-        g_pCXDGToplevelResConstructor = HyprlandAPI::createFunctionHook(PHANDLE, fn.address, (void*)::hkCXDGToplevelResConstructor);
-        break;
-    }
-
     bool sucess = true;
-    sucess      = sucess && g_pCXDGToplevelResConstructor;
     sucess      = sucess && HyprlandAPI::addDispatcherV2(PHANDLE, "plugin:minimize:minimize", ::dispatchMinimize);
     sucess      = sucess && HyprlandAPI::addDispatcherV2(PHANDLE, "plugin:minimize:unminimize", ::dispatchUnminimize);
 
@@ -106,8 +87,6 @@ APICALL EXPORT PLUGIN_DESCRIPTION_INFO PLUGIN_INIT(HANDLE handle) {
                                      CHyprColor{1.0, 0.2, 0.2, 1.0}, 5000);
         throw std::runtime_error("[minimize-dispatcher] Hooks fn init failed");
     }
-
-    g_pCXDGToplevelResConstructor->hook();
 
     if (sucess)
         HyprlandAPI::addNotification(PHANDLE, "[minimize-dispatcher] Initialized successfully!", CHyprColor{0.2, 1.0, 0.2, 1.0}, 5000);

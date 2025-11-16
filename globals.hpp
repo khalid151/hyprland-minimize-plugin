@@ -5,6 +5,3 @@
 #include <hyprland/src/protocols/XDGShell.hpp>
 
 inline HANDLE PHANDLE = nullptr;
-inline CFunctionHook* g_pCXDGToplevelResConstructor = nullptr;
-
-typedef void (*origCXDGToplevelResConstructor)(CXDGToplevelResource*, SP<CXdgToplevel>, SP<CXDGSurfaceResource>);
