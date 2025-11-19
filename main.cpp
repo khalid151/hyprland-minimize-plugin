@@ -14,17 +14,17 @@ void minimize(PHLWINDOW pWindow) {
     auto workspace = pWindow->m_workspace;
     if (workspace->m_name == "special:minimized")
         return;
-    pWindow->m_tags.applyTag(std::format("workspace:{}", (int)workspace->m_id));
+    g_pKeybindManager->m_dispatchers["tagwindow"](std::format("workspace:{}", (int)workspace->m_id));
     g_pKeybindManager->m_dispatchers["movetoworkspacesilent"](std::format("special:minimized,address:0x{:x}", pWindow));
 }
 
 void unminimize(PHLWINDOW pWindow) {
     if (pWindow->m_workspace->m_name != "special:minimized")
         return;
-    auto tags = pWindow->m_tags.getTags();
+    auto tags = pWindow->m_ruleApplicator->m_tagKeeper.getTags();
     auto it   = std::find_if(tags.begin(), tags.end(), [](const std::string& tag) { return tag.starts_with("workspace:"); });
     if (it != tags.end() && it->substr(0, 10) == "workspace:") {
-        pWindow->m_tags.applyTag(*it); // removing the tag
+        pWindow->m_ruleApplicator->m_tagKeeper.applyTag(*it); // removing the tag
         g_pKeybindManager->m_dispatchers["movetoworkspace"](std::format("{},address:0x{:x}", it->substr(10), pWindow));
     }
 }
